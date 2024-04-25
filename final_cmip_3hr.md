@@ -225,7 +225,6 @@ gfdl
 
 ```{code-cell} ipython3
 
-
 gfdl['datetime'] = gfdl.indexes['time'].to_datetimeindex()
 gfdl['datetime']
 # gfdl.to_netcdf(f"{data_path}/subsetted_gfdl_3hr.nc", mode='w')
@@ -246,20 +245,20 @@ tslsi = gfdl[['datetime','tslsi']]
 
 thirtyMinOffset = pd.Timedelta(unit='minutes', value=0)
 
-hfls_3hr_avg = hfls.resample(datetime='3H', offset = thirtyMinOffset).mean()
-hfss_3hr_avg = hfss.resample(datetime='3H', offset = thirtyMinOffset).mean()
-rlds_3hr_avg = rlds.resample(datetime='3H', offset = thirtyMinOffset).mean()
-rlus_3hr_avg = rlus.resample(datetime='3H', offset = thirtyMinOffset).mean()
-rsds_3hr_avg = rsds.resample(datetime='3H', offset = thirtyMinOffset).mean()
-rsus_3hr_avg = rsus.resample(datetime='3H', offset = thirtyMinOffset).mean()
-tas_3hr_avg = tas.resample(datetime='3H', offset = thirtyMinOffset).mean()
-tslsi_3hr_avg = tslsi.resample(datetime='3H', offset = thirtyMinOffset).mean()
+hfls_3hr_avg = hfls.resample(datetime='3H').mean(dim='datetime')
+hfss_3hr_avg = hfss.resample(datetime='3H').mean(dim='datetime')
+rlds_3hr_avg = rlds.resample(datetime='3H').mean(dim='datetime')
+rlus_3hr_avg = rlus.resample(datetime='3H').mean(dim='datetime')
+rsds_3hr_avg = rsds.resample(datetime='3H').mean(dim='datetime')
+rsus_3hr_avg = rsus.resample(datetime='3H').mean(dim='datetime')
+tas_3hr_avg = tas.resample(datetime='3H').mean(dim='datetime')
+tslsi_3hr_avg = tslsi.resample(datetime='3H').mean(dim='datetime')
 
 gfdl_3hr = xr.merge([hfls_3hr_avg,hfss_3hr_avg, rlds_3hr_avg, rlus_3hr_avg, rsds_3hr_avg, rsus_3hr_avg, tas_3hr_avg, tslsi_3hr_avg])
 ```
 
 ```{code-cell} ipython3
-hfls_3hr_avg
+hfls_3hr_avg['hfls'].shape
 ```
 
 ```{code-cell} ipython3
@@ -326,8 +325,34 @@ datetimes = pd.to_datetime({
 
 
 # Replace the integer time dimension with the new datetime dimension
-time_dimension_ds = time_subset.copy()
-time_dimension_ds['datetime'] = datetimes
+# time_dimension_ds = time_subset.copy()
+seb_obs_vars = ['lwdn','lwup', 'swdn' , 'swup' , 'sh_bulk', 'lh_grad', 'cond_flux', 'storage_flux', 'Tsurf', 'lwp']
+data_vars = {
+    'lwdn': ('datetime', time_subset['lwdn'].values),
+    'lwup': ('datetime',  time_subset['lwup'].values),
+    'swdn': ('datetime', time_subset['swdn'].values),
+    'swup': ('datetime', time_subset['swup'].values),
+    'sh_bulk': ('datetime',  time_subset['sh_bulk'].values),
+    'lh_grad': ('datetime',  time_subset['lh_grad'].values),
+    'cond_flux': ('datetime',  time_subset['cond_flux'].values),
+    'storage_flux': ('datetime', time_subset['storage_flux'].values),
+    'Tsurf': ('datetime', time_subset['Tsurf'].values),
+    'lwp': ('datetime', time_subset['lwp'].values),
+}
+time_dimension_ds = xr.Dataset(
+    data_vars = data_vars,
+    coords = {'datetime': datetimes })
+
+seb_obs_vars = ['lwdn','lwup', 'swdn' , 'swup' , 'sh_bulk', 'lh_grad', 'cond_flux', 'storage_flux', 'Tsurf', 'lwp']
+
+# Remove NaN's
+time_dimension_ds = time_dimension_ds.where(time_dimension_ds != -999.0, np.nan)
+```
+
+```{code-cell} ipython3
+# time_subset['lwdn'].assign_coords(datetime=datetimes)
+time_dimension_ds
+# result
 ```
 
 ```{code-cell} ipython3
@@ -350,23 +375,22 @@ storage_flux = time_dimension_ds[['datetime','storage_flux']]
 surface_temp = time_dimension_ds[['datetime','Tsurf']]
 lwp = time_dimension_ds[['datetime','lwp']]
 
-thirtyMinOffset = pd.Timedelta(unit='minutes', value=0)
+lwdn_3hr_avg = lwdn.resample(datetime='3H').mean(dim='datetime')
+lwup_3hr_avg = lwup.resample(datetime='3H').mean(dim='datetime')
+swdn_3hr_avg = swdn.resample(datetime='3H').mean(dim='datetime')
+swup_3hr_avg = swup.resample(datetime='3H').mean(dim='datetime')
+sh_bulk_3hr_avg = sh_bulk.resample(datetime='3H').mean(dim='datetime')
+lh_grad_3hr_avg = lh_grad.resample(datetime='3H').mean(dim='datetime')
+cond_flux_3hr_avg = cond_flux.resample(datetime='3H').mean(dim='datetime')
+storage_flux_3hr_avg = storage_flux.resample(datetime='3H').mean(dim='datetime')
+surface_temp_3hr_avg = surface_temp.resample(datetime='3H').mean(dim='datetime')
+lwp_3hr_avg = lwp.resample(datetime='3H').mean(dim='datetime')
 
-lwdn_3hr_avg = lwdn.resample(datetime='3H', offset = thirtyMinOffset).mean()
-lwup_3hr_avg = lwup.resample(datetime='3H', offset = thirtyMinOffset).mean()
-swdn_3hr_avg = swdn.resample(datetime='3H', offset = thirtyMinOffset).mean()
-swup_3hr_avg = swup.resample(datetime='3H', offset = thirtyMinOffset).mean()
-sh_bulk_3hr_avg = sh_bulk.resample(datetime='3H', offset = thirtyMinOffset).mean()
-lh_grad_3hr_avg = lh_grad.resample(datetime='3H', offset = thirtyMinOffset).mean()
-cond_flux_3hr_avg = cond_flux.resample(datetime='3H', offset = thirtyMinOffset).mean()
-storage_flux_3hr_avg = storage_flux.resample(datetime='3H', offset = thirtyMinOffset).mean()
-surface_temp_3hr_avg = surface_temp.resample(datetime='3H', offset = thirtyMinOffset).mean()
-lwp_3hr_avg = lwp.resample(datetime='3H', offset = thirtyMinOffset).mean()
 ```
 
 ```{code-cell} ipython3
-lwdn_3hr_avg['lwdn']
-print(lwdn.shape())
+lwup_3hr_avg['lwup']
+# print(lwdn.shape())
 ```
 
 ```{code-cell} ipython3
@@ -436,7 +460,7 @@ obs_3hr
 
 ```{code-cell} ipython3
 # tslsi_day_avg = gfdl.resample(datetime='1m').mean()
-tsurf_day_avg = obs_3hr[['datetime', 'Tsurf']].resample(datetime='1m').mean()
+tsurf_day_avg = obs_3hr[['datetime', 'Tsurf']].resample(datetime='1m').mean(dim='datetime')
 ```
 
 ```{code-cell} ipython3
