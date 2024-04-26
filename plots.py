@@ -21,3 +21,11 @@ class Plotter:
         ax.set_xlabel('X-axis label')
         ax.set_ylabel('Y-axis label')
         plt.show()
+
+
+    def plot_box_whisker_by_month(self, data):
+        fig, ax = plt.subplots()
+        data.groupby('time.month').boxplot(column='value', ax=ax)
+        ax.set_xlabel('Month')
+        ax.set_ylabel('Value')
+        plt.show()

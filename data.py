@@ -6,7 +6,7 @@ import pickle
 
 class Data:
     def __init__(self):
-        self.data_path = Path.home() / "repos/a500/" / 'final/data/'
+        self.data_path = Path.home() / "Documents/UBC/ATSC500/atsc500/" / 'data/unzipped'
         self.gfdl_name = "subsetted_gfdl_3hr.pickle"
         self.obs_name = "subsetted_obs_3hr.pickle"
 
@@ -21,5 +21,5 @@ class Data:
 
     def get_data(self, ):
         obs = self.load_pickle_data(self.obs_name)
-        gfdl = self.load_xarray_data(self.gfdl_name)
+        gfdl = self.load_pickle_data(self.gfdl_name)
         return obs, gfdl
